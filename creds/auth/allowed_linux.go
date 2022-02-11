@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"fmt"
 	"golang.org/x/sys/unix"
 	"log"
 	"net"
@@ -24,9 +25,8 @@ func Allowed(conn *net.UnixConn, groups map[string]struct{}) bool {
 		ucred, err = unix.GetsockoptUcred(int(file.Fd()), unix.SOL_SOCKET,
 			unix.SO_PEERCRED)
 		if err == unix.EINTR {
-			continue
+			continue // syscall interrupted, try again
 		}
-
 		if err != nil {
 			log.Println(err)
 			return false
@@ -35,7 +35,7 @@ func Allowed(conn *net.UnixConn, groups map[string]struct{}) bool {
 		break
 	}
 
-	u, err := user.LookupId(string(ucred.Uid))
+	u, err := user.LookupId(fmt.Sprint(ucred.Uid))
 	if err != nil {
 		log.Println(err)
 		return false
