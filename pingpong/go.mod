@@ -1,3 +1,3 @@
-module awesomeProject
+module pingpong
 
 go 1.17
